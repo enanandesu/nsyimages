@@ -38,6 +38,16 @@ def update_alias_list():
         with open(config.alias_file, 'w', encoding='utf-8') as f:
             json.dump(alias_list, f, ensure_ascii=False, indent=4)
 
+def update_whitelist():
+    global whitelist
+    try:
+        with open(config.whitelist_file, 'r', encoding='utf-8') as f:
+            whitelist = json.load(f)
+    except FileNotFoundError:
+        whitelist = {}
+        with open(config.whitelist_file, 'w', encoding='utf-8') as f:
+            json.dump(whitelist, f, ensure_ascii=False, indent=4)
+
 def update_names():
     global names
     names = [d for d in os.listdir(images_path) if os.path.isdir(os.path.join(images_path, d))]
@@ -53,8 +63,16 @@ def rplyimg(name):
 
 nsy_list = on_command("nsy列表", aliases={"女声优列表"}, priority = 3, block = True)
 @nsy_list.handle()
-async def namelist(bot: Bot):
+async def namelist(bot: Bot, event: MessageEvent):
     update_names()
+    update_whitelist()
+    group_id = str(event.get_session_id()).split("_")[1]
+    for name in names:
+        if name in whitelist:
+            if group_id in whitelist[name]:
+                pass
+            else:
+                names.remove(name)
     rpl = f"支持查询的声优有：{names[0]}"
     for name in names:
         if name != names[0]:
@@ -63,9 +81,17 @@ async def namelist(bot: Bot):
 
 nsy = on_command("nsy", aliases={"女声优"}, priority = 4, block = True)
 @nsy.handle()
-async def _(bot:Bot, args: Message = CommandArg()):
+async def _(bot:Bot, event: MessageEvent, args: Message = CommandArg()):
     update_names()
     update_alias_list()
+    update_whitelist()
+    group_id = str(event.get_session_id()).split("_")[1]
+    for name in names:
+        if name in whitelist:
+            if group_id in whitelist[name]:
+                pass
+            else:
+                names.remove(name)
     if aname := args.extract_plain_text():
         tmp = aname.split()
         if len(tmp) != 1:
@@ -102,9 +128,17 @@ async def ___(bot:Bot, confirm:str = ArgPlainText()):
 
 nsy_upload = on_command("上传nsy", aliases={"上传女声优"}, priority = 4, block = True)
 @nsy_upload.got("name", prompt="请发送声优全名或别名")
-async def ____(bot:Bot, name:str = ArgPlainText()):
+async def ____(bot:Bot, event:MessageEvent, name:str = ArgPlainText()):
     update_names()
     update_alias_list()
+    update_whitelist()
+    group_id = str(event.get_session_id()).split("_")[1]
+    for n in names:
+        if n in whitelist:
+            if group_id in whitelist[n]:
+                pass
+            else:
+                names.remove(n)
     real_name = alias_list.get(name, name)
     if real_name not in names:
         await nsy_upload.finish('不包含该声优哦，您可以自行添加ww')
@@ -154,15 +188,31 @@ nsy图片数 + 全名/别名 → 查询该声优的图片数量
 
 nsy_random = on_command("看nsy", priority = 3, block = True)
 @nsy_random.handle()
-async def ______(bot: Bot):
+async def ______(bot: Bot, event: MessageEvent):
     update_names()
+    update_whitelist()
+    group_id = str(event.get_session_id()).split("_")[1]
+    for name in names:
+        if name in whitelist:
+            if group_id in whitelist[name]:
+                pass
+            else:
+                names.remove(name)
     await nsy_random.finish(rplyimg(random.choice(names))[0])
 
 add_nsy_alias = on_command("添加nsy别名", aliases={"添加女声优别名"}, priority = 4, block = True)
 @add_nsy_alias.handle()
-async def _______(bot:Bot, args: Message = CommandArg()):
+async def _______(bot:Bot, event:MessageEvent, args: Message = CommandArg()):
     update_names()
     update_alias_list()
+    update_whitelist()
+    group_id = str(event.get_session_id()).split("_")[1]
+    for name in names:
+        if name in whitelist:
+            if group_id in whitelist[name]:
+                pass
+            else:
+                names.remove(name)
     if fulltext := args.extract_plain_text():
         tmp = fulltext.split()
         if len(tmp) != 2:
@@ -180,9 +230,17 @@ async def _______(bot:Bot, args: Message = CommandArg()):
 
 nsy_alias = on_command("nsy别名", aliases={"女声优别名"}, priority = 3, block = True)
 @nsy_alias.handle()
-async def ________(bot:Bot, args: Message = CommandArg()):
+async def ________(bot:Bot, event:MessageEvent, args: Message = CommandArg()):
     update_names()
     update_alias_list()
+    update_whitelist()
+    group_id = str(event.get_session_id()).split("_")[1]
+    for name in names:
+        if name in whitelist:
+            if group_id in whitelist[name]:
+                pass
+            else:
+                names.remove(name)
     if fulltext := args.extract_plain_text():
         tmp = fulltext.split()
         if len(tmp) != 1:
@@ -203,9 +261,17 @@ async def ________(bot:Bot, args: Message = CommandArg()):
 
 counter = on_command("nsy图片数", aliases={"女声优图片数"}, priority = 3, block = True)
 @counter.handle()
-async def _________(bot:Bot, args: Message = CommandArg()):
+async def _________(bot:Bot, event:MessageEvent, args: Message = CommandArg()):
     update_names()
     update_alias_list()
+    update_whitelist()
+    group_id = str(event.get_session_id()).split("_")[1]
+    for name in names:
+        if name in whitelist:
+            if group_id in whitelist[name]:
+                pass
+            else:
+                names.remove(name)
     if aname := args.extract_plain_text():
         tmp = aname.split()
         if len(tmp) != 1:
